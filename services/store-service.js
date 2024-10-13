@@ -18,7 +18,7 @@ let categories = []
 
 function initialize() {
 	return new Promise(async (res, rej) => {
-		fs.readFile(__dirname + '/data/items.json', 'utf8', async (err, data) => {
+		fs.readFile('../data/items.json', 'utf8', async (err, data) => {
 			if (err) {
 				return rej('unable to read items file')
 			}
@@ -26,22 +26,18 @@ function initialize() {
 			try {
 				items = await JSON.parse(data)
 
-				fs.readFile(
-					__dirname + '/data/categories.json',
-					'utf8',
-					async (err, data) => {
-						if (err) {
-							return rej('unable to read categories file')
-						}
-
-						try {
-							categories = await JSON.parse(data)
-							res('data fetched')
-						} catch (err) {
-							return rej('unable to parse categories.json')
-						}
+				fs.readFile('../data/categories.json', 'utf8', async (err, data) => {
+					if (err) {
+						return rej('unable to read categories file')
 					}
-				)
+
+					try {
+						categories = await JSON.parse(data)
+						res('data fetched')
+					} catch (err) {
+						return rej('unable to parse categories.json')
+					}
+				})
 			} catch (err) {
 				return rej('unable to parse items file')
 			}
