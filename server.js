@@ -20,9 +20,16 @@ const HTTP_PORT = process.env.PORT || 8080
 
 app.use(express.static('public'))
 
-app.listen(HTTP_PORT, () =>
-	console.log(`Express http server listening on: ${HTTP_PORT}`)
-)
+storeServices
+	.initialize()
+	.then(() => {
+		app.listen(HTTP_PORT, () =>
+			console.log(`Express http server listening on: ${HTTP_PORT}`)
+		)
+	})
+	.catch((err) => {
+		console.log(err)
+	})
 
 app.get('/', (req, res) => {
 	res.redirect('/about')
@@ -33,15 +40,24 @@ app.get('/about', (req, res) => {
 })
 
 app.get('/shop', (req, res) => {
-	res.send('TODO: get all items where published == true in a JSON string')
+	storeServices
+		.getPublishedItems()
+		.then((data) => res.send(data))
+		.catch((err) => res.send({ message: err }))
 })
 
 app.get('/items', (req, res) => {
-	res.send('TODO: get all items in the items.json file in a JSON string')
+	storeServices
+		.getAllItems()
+		.then((data) => res.send(data))
+		.catch((err) => res.send({ message: err }))
 })
 
 app.get('/categories', (req, res) => {
-	res.send('TODO: get all the categories in a JSON string')
+	storeServices
+		.getCategories()
+		.then((data) => res.send(data))
+		.catch((err) => res.send({ message: err }))
 })
 
 app.use((req, res, next) => {
