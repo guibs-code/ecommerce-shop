@@ -18,7 +18,9 @@ const path = require('path')
 const app = express()
 const HTTP_PORT = process.env.PORT || 8080
 
-app.use(express.static('public'))
+app.set('views', __dirname + '/views')
+
+app.use(express.static(__dirname + '/public'))
 
 storeServices
 	.initialize()
