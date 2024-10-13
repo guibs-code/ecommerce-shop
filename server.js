@@ -5,13 +5,13 @@ No part of this assignment has been copied manually or electronically from any o
 
 Name: Guilherme da Silva
 Student ID: 122538234
-Date: October 9, 2024
+Date: October 13, 2024
 Vercel Web App URL: 
-GitHub Repository URL: 
+GitHub Repository URL: https://github.com/guibs-code/web322-app
 
 ********************************************************************************/
 
-const storeServices = require('./store-service')
+const storeServices = require('./services/store-service')
 const express = require('express')
 const path = require('path')
 
