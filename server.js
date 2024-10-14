@@ -11,7 +11,7 @@ GitHub Repository URL: https://github.com/guibs-code/web322-app
 
 ********************************************************************************/
 
-const storeServices = require('./store-service')
+const storeServices = require('./store-service.js')
 const express = require('express')
 const path = require('path')
 
