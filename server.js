@@ -6,7 +6,7 @@ No part of this assignment has been copied manually or electronically from any o
 Name: Guilherme da Silva
 Student ID: 122538234
 Date: October 13, 2024
-Vercel Web App URL: 
+Vercel Web App URL: https://web322-8c6691wat-guibs-codes-projects.vercel.app/about (data not working)
 GitHub Repository URL: https://github.com/guibs-code/web322-app
 
 ********************************************************************************/
