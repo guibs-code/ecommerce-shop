@@ -1,0 +1,43 @@
+<div class='row'>
+	{{#if items}}
+		<div class='col-md-12'>
+			<h2>Items</h2>
+			<hr />
+			<div class='table-responsive'>
+				<table class='table'>
+					<thead>
+						<tr>
+							<th scope='col'>Item ID</th>
+							<th scope='col'>Title</th>
+							<th scope='col'>Post Date</th>
+							<th scope='col'>Category</th>
+							<th scope='col'>Price</th>
+							<th scope='col'>Published</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						{{#each items}}
+							<tr>
+								<td scope='row'>{{this.id}}</td>
+								<td>{{this.title}}</td>
+								<td>{{this.postDate}}</td>
+								<td><a
+										href='/items?category={{this.category}}'
+									>{{this.category}}</a></td>
+								<td>$ {{this.price}}</td>
+								<td>{{this.published}}</td>
+							</tr>
+						{{/each}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{{/if}}
+
+	{{#unless items}}
+		<div class='col-md-12 text-center'>
+			<strong>{{this.message}}</strong>
+		</div>
+	{{/unless}}
+</div>

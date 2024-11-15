@@ -92,8 +92,17 @@ function addItem(itemData) {
 
 			itemData.id = items.length + 1
 
+			// adding the post date formatted YYYY-MM-DD
+			let postDate = new Date()
+			let postYear = String(postDate.getFullYear())
+			let postMon = String(postDate.getMonth() + 1).padStart(2, '0')
+			let postDay = String(postDate.getDate()).padStart(2, '0')
+
+			itemData.postDate = `${postYear}-${postMon}-${postDay}`
+
 			console.log(itemData)
 
+			// pushing the item to the items array
 			items.push(itemData)
 			res(itemData)
 		} catch (err) {
@@ -143,6 +152,20 @@ function getItemById(id) {
 	})
 }
 
+function getPublishedItemsByCategory(category) {
+	return new Promise((res, rej) => {
+		const publishedItems = items.filter(
+			(item) => item.published === true && item.category == category
+		)
+
+		if (publishedItems.length > 0) {
+			res(publishedItems)
+		} else {
+			rej('no results returned')
+		}
+	})
+}
+
 module.exports = {
 	items,
 	categories,
@@ -154,4 +177,5 @@ module.exports = {
 	getItemsByCategory,
 	getItemsByMinDate,
 	getItemById,
+	getPublishedItemsByCategory,
 }

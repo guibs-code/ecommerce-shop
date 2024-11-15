@@ -1,0 +1,37 @@
+<div class='row'>
+	{{#if categories}}
+		<div class='col-md-12'>
+			<h2>Categories</h2>
+			<hr />
+			<div class='table-responsive'>
+				<table class='table'>
+					<thead>
+						<tr>
+							<th scope='col'>Category ID</th>
+							<th scope='col'>Category Name</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						{{#each categories}}
+							<tr>
+								<td scope='row'><a
+										href='/items?category={{this.id}}'
+									>{{this.id}}</a></td>
+								<td scope='row'><a
+										href='/items?category={{this.id}}'
+									>{{this.category}}</a></td>
+							</tr>
+						{{/each}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{{/if}}
+
+	{{#unless categories}}
+		<div class='col-md-12 text-center'>
+			<strong>{{this.message}}</strong>
+		</div>
+	{{/unless}}
+</div>
