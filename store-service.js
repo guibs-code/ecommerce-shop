@@ -12,7 +12,7 @@ GitHub Repository URL: https://github.com/guibs-code/web322-app
 ********************************************************************************/
 require('dotenv').config()
 const Sequelize = require('sequelize')
-import 'pg'
+const pg = require('pg')
 
 // Setting up Sequelize / Database
 const sequelize = new Sequelize(
