@@ -1,11 +1,11 @@
 /*********************************************************************************
-WEB322 – Assignment 04
+WEB322 – Assignment 05
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Guilherme da Silva
 Student ID: 122538234
-Date: November 14, 2024
+Date: November 23, 2024
 Vercel Web App URL: https://web322-8c6691wat-guibs-codes-projects.vercel.app/about
 GitHub Repository URL: https://github.com/guibs-code/web322-app
 
@@ -26,7 +26,7 @@ const userRouter = express.Router()
 const HTTP_PORT = process.env.PORT || 8080
 
 // Handlebars custom helpers
-const hbsHelpers = exphbs.create({
+const hbsHelpers = {
 	navLink: function (url, options) {
 		return (
 			'<li class="nav-item"><a' +
@@ -53,7 +53,13 @@ const hbsHelpers = exphbs.create({
 	safeHTML: function (context) {
 		return stripJs(context)
 	},
-})
+	formatDate: function (dateObj) {
+		let year = dateObj.getFullYear()
+		let month = (dateObj.getMonth() + 1).toString()
+		let day = dateObj.getDate().toString()
+		return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+	},
+}
 
 // Handlebars setup
 app.engine(
@@ -77,6 +83,7 @@ const upload = multer() // no { storage: storage } since we are not using disk s
 app.set('views', __dirname + '/views')
 
 app.use(express.static(__dirname + '/public'))
+app.use(express.urlencoded())
 
 itemData
 	.initialize()
@@ -103,6 +110,10 @@ app.use(function (req, res, next) {
 	next()
 })
 
+///////////////////////////////////////
+// SIMPLE ROUTES
+///////////////////////////////////////
+
 app.get('/', (req, res) => {
 	res.redirect('/shop')
 })
@@ -110,6 +121,10 @@ app.get('/', (req, res) => {
 app.get('/about', (req, res) => {
 	res.render('about')
 })
+
+///////////////////////////////////////
+// SHOP ROUTES
+///////////////////////////////////////
 
 app.get('/shop', async (req, res) => {
 	let currentDate = new Date()
@@ -206,34 +221,46 @@ app.get('/shop/:id', async (req, res) => {
 	res.render('shop', { data: viewData })
 })
 
+///////////////////////////////////////
+// ITEMS ROUTES
+///////////////////////////////////////
+
 app.get('/items', (req, res) => {
 	if (req.query.category) {
 		itemData
 			.getItemsByCategory(req.query.category)
-			.then((data) => res.render('items', { items: data }))
+			.then((data) =>
+				data.length > 0
+					? res.render('items', { items: data })
+					: res.render('items', { message: 'no results' })
+			)
 			.catch((err) => res.render('items', { message: 'no results' }))
 	} else if (req.query.minDate) {
 		itemData
 			.getItemsByMinDate(req.query.minDate)
-			.then((data) => res.render('items', { items: data }))
+			.then((data) =>
+				data.length > 0
+					? res.render('items', { items: data })
+					: res.render('items', { message: 'no results' })
+			)
 			.catch((err) => res.render('items', { message: 'no results' }))
 	} else {
 		itemData
 			.getAllItems()
-			.then((data) => res.render('items', { items: data }))
+			.then((data) =>
+				data.length > 0
+					? res.render('items', { items: data })
+					: res.render('items', { message: 'no results' })
+			)
 			.catch((err) => res.render('items', { message: 'no results' }))
 	}
 })
 
-app.get('/categories', (req, res) => {
+app.get('/items/add', (req, res) => {
 	itemData
 		.getCategories()
-		.then((data) => res.render('categories', { categories: data }))
-		.catch((err) => res.render('categories', { message: 'no results' }))
-})
-
-app.get('/items/add', (req, res) => {
-	res.render('addItem')
+		.then((data) => res.render('addItem', { categories: data }))
+		.catch(() => res.render('addItem', { categories: [] }))
 })
 
 app.get('/item/:id', (req, res) => {
@@ -278,6 +305,51 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
 
 	res.redirect('/items')
 })
+
+app.get('/items/delete/:id', (req, res) => {
+	itemData
+		.deleteItemById(req.params.id)
+		.then(() => res.redirect('/items'))
+		.catch(() => res.status(500).send('Unable to Remove Item / Item not found'))
+})
+
+///////////////////////////////////////
+// CATEGORIES ROUTES
+///////////////////////////////////////
+
+app.get('/categories', (req, res) => {
+	itemData
+		.getCategories()
+		.then((data) =>
+			data.length > 0
+				? res.render('categories', { categories: data })
+				: res.render('categories', { message: 'no results' })
+		)
+		.catch((err) => res.render('categories', { message: 'no results' }))
+})
+
+app.get('/categories/add', (req, res) => {
+	res.render('addCategory')
+})
+
+app.post('/categories/add', (req, res) => {
+	itemData.addCategory(req.body).then(() => res.redirect('/categories'))
+})
+
+app.get('/categories/delete/:id', (req, res) => {
+	console.log(req.params.id)
+
+	itemData
+		.deleteCategoryById(req.params.id)
+		.then(() => res.redirect('/categories'))
+		.catch(() =>
+			res.status(500).send('Unable to Remove Category / Category not found')
+		)
+})
+
+///////////////////////////////////////
+// 404 ROUTE
+///////////////////////////////////////
 
 app.use((req, res, next) => {
 	res.status(404).render('404')

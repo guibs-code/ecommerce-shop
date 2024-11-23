@@ -1,13 +1,15 @@
 <div class='row'>
-	{{#if categories}}
-		<div class='col-md-12'>
-			<h2>Categories</h2>
-			<hr />
+	<div class='col-md-12'>
+		<h2>Categories -
+			<a href='/categories/add' class='btn btn-success pull-right'>Add Category</a></h2>
+		<hr />
+		{{#if categories}}
 			<div class='table-responsive'>
 				<table class='table'>
 					<thead>
 						<tr>
 							<th scope='col'>Category ID</th>
+							<th scope='col'>Category Name</th>
 							<th scope='col'>Category Name</th>
 						</tr>
 					</thead>
@@ -21,13 +23,17 @@
 								<td scope='row'><a
 										href='/items?category={{this.id}}'
 									>{{this.category}}</a></td>
+								<td scope='row'><a
+										href='/categories/delete/{{this.id}}'
+										class='btn btn-danger'
+									>Remove</a></td>
 							</tr>
 						{{/each}}
 					</tbody>
 				</table>
 			</div>
-		</div>
-	{{/if}}
+		{{/if}}
+	</div>
 
 	{{#unless categories}}
 		<div class='col-md-12 text-center'>
