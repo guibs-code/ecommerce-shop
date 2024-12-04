@@ -1,11 +1,11 @@
 /*********************************************************************************
-WEB322 – Assignment 05
+WEB322 – Assignment 06
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Guilherme da Silva
 Student ID: 122538234
-Date: November 23, 2024
+Date: December 7, 2024
 Vercel Web App URL: https://web322-8c6691wat-guibs-codes-projects.vercel.app/about
 GitHub Repository URL: https://github.com/guibs-code/web322-app
 
@@ -15,15 +15,17 @@ require('dotenv').config()
 const express = require('express')
 const path = require('path')
 const itemData = require('./store-service')
+const authData = require('./auth-service')
 const multer = require('multer')
 const cloudinary = require('cloudinary').v2
 const streamifier = require('streamifier')
 const exphbs = require('express-handlebars')
 const stripJs = require('strip-js')
+const clientSessions = require('client-sessions')
 
 const app = express()
 const userRouter = express.Router()
-const HTTP_PORT = process.env.PORT || 8080
+const HTTP_PORT = process.env.PORT || process.env.HTTP_PORT
 
 // Handlebars custom helpers
 const hbsHelpers = {
@@ -71,6 +73,17 @@ app.engine(
 )
 app.set('view engine', '.hbs')
 
+// Configure client-sessions
+app.use(
+	clientSessions({
+		cookieName: 'session',
+		secret: process.env.SESSION_SECRET,
+		duration: 3 * 60 * 60 * 1000, // 3 hours
+		activeDuration: 5 * 60 * 1000, // 5 minutes
+	})
+)
+
+// Cloudinary setup
 cloudinary.config({
 	cloud_name: process.env.CLOUD_NAME,
 	api_key: process.env.CLOUD_KEY,
@@ -81,19 +94,34 @@ cloudinary.config({
 const upload = multer() // no { storage: storage } since we are not using disk storage
 
 app.set('views', __dirname + '/views')
-
 app.use(express.static(__dirname + '/public'))
 app.use(express.urlencoded())
 
+// Middleware to make "session" available to all views
+app.use((req, res, next) => {
+	res.locals.session = req.session
+	next()
+})
+
+// Helper function to check if the user is logged in
+function ensureLogin(req, res, next) {
+	if (!req.session.user) {
+		res.redirect('/login')
+	} else {
+		next()
+	}
+}
+
 itemData
 	.initialize()
+	.then(authData.initialize)
 	.then(() => {
-		app.listen(HTTP_PORT, () =>
-			console.log(`Express http server listening on: ${HTTP_PORT}`)
+		app.listen(process.env.HTTP_PORT, () =>
+			console.log(`app listening on: ${process.env.HTTP_PORT}`)
 		)
 	})
 	.catch((err) => {
-		console.log(err)
+		console.log('unable to start server: ' + err)
 	})
 
 app.use(function (req, res, next) {
@@ -225,7 +253,7 @@ app.get('/shop/:id', async (req, res) => {
 // ITEMS ROUTES
 ///////////////////////////////////////
 
-app.get('/items', (req, res) => {
+app.get('/items', ensureLogin, (req, res) => {
 	if (req.query.category) {
 		itemData
 			.getItemsByCategory(req.query.category)
@@ -256,14 +284,14 @@ app.get('/items', (req, res) => {
 	}
 })
 
-app.get('/items/add', (req, res) => {
+app.get('/items/add', ensureLogin, (req, res) => {
 	itemData
 		.getCategories()
 		.then((data) => res.render('addItem', { categories: data }))
 		.catch(() => res.render('addItem', { categories: [] }))
 })
 
-app.get('/item/:id', (req, res) => {
+app.get('/item/:id', ensureLogin, (req, res) => {
 	itemData
 		.getItemById(req.params.id)
 		.then((data) => res.send(data))
@@ -306,7 +334,7 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
 	res.redirect('/items')
 })
 
-app.get('/items/delete/:id', (req, res) => {
+app.get('/items/delete/:id', ensureLogin, (req, res) => {
 	itemData
 		.deleteItemById(req.params.id)
 		.then(() => res.redirect('/items'))
@@ -317,7 +345,7 @@ app.get('/items/delete/:id', (req, res) => {
 // CATEGORIES ROUTES
 ///////////////////////////////////////
 
-app.get('/categories', (req, res) => {
+app.get('/categories', ensureLogin, (req, res) => {
 	itemData
 		.getCategories()
 		.then((data) =>
@@ -328,15 +356,15 @@ app.get('/categories', (req, res) => {
 		.catch((err) => res.render('categories', { message: 'no results' }))
 })
 
-app.get('/categories/add', (req, res) => {
+app.get('/categories/add', ensureLogin, (req, res) => {
 	res.render('addCategory')
 })
 
-app.post('/categories/add', (req, res) => {
+app.post('/categories/add', ensureLogin, (req, res) => {
 	itemData.addCategory(req.body).then(() => res.redirect('/categories'))
 })
 
-app.get('/categories/delete/:id', (req, res) => {
+app.get('/categories/delete/:id', ensureLogin, (req, res) => {
 	console.log(req.params.id)
 
 	itemData
@@ -345,6 +373,44 @@ app.get('/categories/delete/:id', (req, res) => {
 		.catch(() =>
 			res.status(500).send('Unable to Remove Category / Category not found')
 		)
+})
+
+///////////////////////////////////////
+// USER LOGIN/REGISTER ROUTES
+///////////////////////////////////////
+
+app.get('/login', (req, res) => {
+	res.render('login')
+})
+
+app.get('/register', (req, res) => {
+	res.render('register')
+})
+
+app.post('/register', (req, res) => {
+	authData
+		.registerUser(req.body)
+		.then(() => res.render('register', { successMessage: 'User created' }))
+		.catch((err) =>
+			res.render('register', { errorMessage: err, userName: req.body.userName })
+		)
+})
+
+app.post('/login', (req, res) => {
+	req.body.userAgent = req.get('User-Agent')
+
+	authData
+		.checkUser(req.body)
+		.then((user) => {
+			req.session.user = {
+				userName: user.userName,
+				email: user.email,
+				loginHistory: user.loginHistory,
+			}
+
+			res.redirect('/items')
+		})
+		.catch((err) => res.render('login', { errorMessage: err }))
 })
 
 ///////////////////////////////////////
