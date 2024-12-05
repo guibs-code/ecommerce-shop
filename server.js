@@ -77,7 +77,7 @@ app.set('view engine', '.hbs')
 app.use(
 	clientSessions({
 		cookieName: 'session',
-		secret: process.env.SESSION_SECRET,
+		secret: process.env.CLIENT_SESSION_SECRET,
 		duration: 5 * 60 * 1000, // 5 minutes
 		activeDuration: 5 * 60 * 1000, // 5 minutes
 	})
