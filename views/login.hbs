@@ -1,0 +1,41 @@
+<h2>Login</h2>
+<hr />
+{{#if errorMessage}}
+	<div class='alert alert-danger'><strong>Error:</strong> {{errorMessage}}</div>
+	<br />
+{{/if}}
+<form method='post' action='/login'>
+	<div class='row'>
+		<div class='col-md-3'>
+			<div class='form-group'>
+				<input
+					class='form-control'
+					id='userName'
+					name='userName'
+					type='text'
+					placeholder='User Name'
+					value='{{userName}}'
+					required
+				/>
+			</div>
+		</div>
+	</div>
+	<br />
+	<div class='row'>
+		<div class='col-md-3'>
+			<div class='form-group'>
+				<input
+					class='form-control'
+					id='password'
+					name='password'
+					type='password'
+					placeholder='Password'
+					required
+				/>
+			</div>
+		</div>
+	</div>
+	<br />
+	<input type='submit' class='btn btn-primary pull-right' value='Login' /><br
+	/><br /><br />
+</form>

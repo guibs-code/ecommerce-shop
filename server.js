@@ -5,7 +5,7 @@ No part of this assignment has been copied manually or electronically from any o
 
 Name: Guilherme da Silva
 Student ID: 122538234
-Date: December 7, 2024
+Date: December 5, 2024
 Vercel Web App URL: https://web322-8c6691wat-guibs-codes-projects.vercel.app/about
 GitHub Repository URL: https://github.com/guibs-code/web322-app
 
@@ -78,7 +78,7 @@ app.use(
 	clientSessions({
 		cookieName: 'session',
 		secret: process.env.SESSION_SECRET,
-		duration: 3 * 60 * 60 * 1000, // 3 hours
+		duration: 5 * 60 * 1000, // 5 minutes
 		activeDuration: 5 * 60 * 1000, // 5 minutes
 	})
 )
@@ -365,8 +365,6 @@ app.post('/categories/add', ensureLogin, (req, res) => {
 })
 
 app.get('/categories/delete/:id', ensureLogin, (req, res) => {
-	console.log(req.params.id)
-
 	itemData
 		.deleteCategoryById(req.params.id)
 		.then(() => res.redirect('/categories'))
@@ -410,7 +408,18 @@ app.post('/login', (req, res) => {
 
 			res.redirect('/items')
 		})
-		.catch((err) => res.render('login', { errorMessage: err }))
+		.catch((err) => {
+			res.render('login', { errorMessage: err, userName: req.body.userName })
+		})
+})
+
+app.get('/logout', (req, res) => {
+	req.session.reset()
+	res.redirect('/')
+})
+
+app.get('/userHistory', ensureLogin, (req, res) => {
+	res.render('userHistory')
 })
 
 ///////////////////////////////////////
