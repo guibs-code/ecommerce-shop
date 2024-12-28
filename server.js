@@ -386,8 +386,6 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-	console.log(req.body)
-
 	authData
 		.registerUser(req.body)
 		.then(() => res.render('register', { successMessage: 'User created' }))
